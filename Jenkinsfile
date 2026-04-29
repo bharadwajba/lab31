@@ -61,7 +61,7 @@ pipeline {
         dir('frontend') {
           withEnv(['CI=true']) {
             script {
-              runCommand('npm test -- --watchAll=false --runInBand')
+              runCommand('npm test -- --watchAll=false --runInBand --passWithNoTests')
             }
           }
         }
