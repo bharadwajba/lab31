@@ -10,11 +10,15 @@ git init
 git branch -M main
 git add .
 git commit -m "Add Jenkins pipeline"
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git remote add origin https://github.com/bharadwajba/lab31.git
 git push -u origin main
 ```
 
-Replace `YOUR_USERNAME/YOUR_REPO` with your GitHub repository.
+GitHub repository:
+
+```text
+https://github.com/bharadwajba/lab31.git
+```
 
 ## 2. Create Jenkins Pipeline Job
 
@@ -23,7 +27,7 @@ Replace `YOUR_USERNAME/YOUR_REPO` with your GitHub repository.
 3. Choose **Pipeline** or **Multibranch Pipeline**.
 4. Use **Pipeline script from SCM**.
 5. SCM: **Git**.
-6. Repository URL: your GitHub repo URL.
+6. Repository URL: `https://github.com/bharadwajba/lab31.git`.
 7. Branch: `*/main`.
 8. Script Path: `Jenkinsfile`.
 9. Save and click **Build Now**.
