@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
-// ✅ New
-const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
+  const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
+
   const [users, setUsers] = useState([]);
   const [name, setName] = useState("");
 
@@ -20,25 +20,40 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
   const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
 
-  // ===== USER CRUD =====
-  const fetchUsers = async ()=> {
+  const fetchUsers = async () => {
     const res = await axios.get(`${API}/user`);
     setUsers(res.data);
   };
 
-  const addUser = async ()=> {
-    await axios.post(`${API}/user`, {name});
+  const fetchPosts = async () => {
+    const res = await axios.get(`${API}/post`);
+    setPosts(res.data);
+  };
+
+  const fetchStudents = async () => {
+    const res = await axios.get(`${API}/student`);
+    setStudents(res.data);
+  };
+
+  const fetchCourses = async () => {
+    const res = await axios.get(`${API}/course`);
+    setCourses(res.data);
+  };
+
+  const addUser = async () => {
+    if (!name.trim()) return;
+    await axios.post(`${API}/user`, { name });
     setName("");
     fetchUsers();
   };
 
-  const deleteUser = async(id)=> {
+  const deleteUser = async (id) => {
     await axios.delete(`${API}/user/${id}`);
     fetchUsers();
   };
 
-  // ===== ONE TO MANY =====
-  const addPost = async ()=> {
+  const addPost = async () => {
+    if (!postTitle.trim() || !selectedUser) return;
     await axios.post(`${API}/post`, {
       title: postTitle,
       userId: selectedUser
@@ -47,25 +62,22 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
     fetchPosts();
   };
 
-  const fetchPosts = async ()=> {
-    const res = await axios.get(`${API}/post`);
-    setPosts(res.data);
-  };
-
-  // ===== MANY TO MANY =====
-  const addStudent = async ()=> {
-    await axios.post(`${API}/student`, {name: studentName});
+  const addStudent = async () => {
+    if (!studentName.trim()) return;
+    await axios.post(`${API}/student`, { name: studentName });
     setStudentName("");
     fetchStudents();
   };
 
-  const addCourse = async ()=> {
-    await axios.post(`${API}/course`, {title: courseName});
+  const addCourse = async () => {
+    if (!courseName.trim()) return;
+    await axios.post(`${API}/course`, { title: courseName });
     setCourseName("");
     fetchCourses();
   };
 
-  const enroll = async ()=> {
+  const enroll = async () => {
+    if (!selectedStudent || !selectedCourse) return;
     await axios.post(`${API}/enroll`, {
       studentId: selectedStudent,
       courseId: selectedCourse
@@ -74,17 +86,7 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
     fetchCourses();
   };
 
-  const fetchStudents = async ()=> {
-    const res = await axios.get(`${API}/student`);
-    setStudents(res.data);
-  };
-
-  const fetchCourses = async ()=> {
-    const res = await axios.get(`${API}/course`);
-    setCourses(res.data);
-  };
-
-  useEffect(()=>{
+  useEffect(() => {
     fetchUsers();
     fetchPosts();
     fetchStudents();
@@ -93,62 +95,70 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
   }, []);
 
   return (
-    <div style={{padding:"20px"}}>
+    <div style={{ padding: "20px" }}>
+      <h1>MERN CRUD + Relationships</h1>
 
-      <h1>🚀 MERN CRUD + Relationships</h1>
-
-      {/* USER CRUD */}
-      <h2>👤 User CRUD</h2>
-      <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name"/>
+      <h2>User CRUD</h2>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
       <button onClick={addUser}>Add</button>
 
-      {users.map(u=>(
+      {users.map((u) => (
         <div key={u._id}>
           {u.name}
-          <button onClick={()=>deleteUser(u._id)}>Delete</button>
+          <button onClick={() => deleteUser(u._id)}>Delete</button>
         </div>
       ))}
 
-      {/* ONE TO MANY */}
-      <h2>🧠 One-to-Many (User → Posts)</h2>
+      <h2>One-to-Many (User to Posts)</h2>
 
-      <select onChange={(e)=>setSelectedUser(e.target.value)}>
-        <option>Select User</option>
-        {users.map(u=>(
+      <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
+        <option value="">Select User</option>
+        {users.map((u) => (
           <option key={u._id} value={u._id}>{u.name}</option>
         ))}
       </select>
 
-      <input placeholder="Post Title" onChange={(e)=>setPostTitle(e.target.value)} />
+      <input
+        value={postTitle}
+        placeholder="Post Title"
+        onChange={(e) => setPostTitle(e.target.value)}
+      />
       <button onClick={addPost}>Add Post</button>
 
-      {posts.map(p=>(
+      {posts.map((p) => (
         <div key={p._id}>
-          {p.title} → {p.userId?.name}
+          {p.title} - {p.userId?.name}
         </div>
       ))}
 
-      {/* MANY TO MANY */}
-      <h2>🔗 Many-to-Many (Students ↔ Courses)</h2>
+      <h2>Many-to-Many (Students and Courses)</h2>
 
-      <input placeholder="Student Name" onChange={(e)=>setStudentName(e.target.value)} />
+      <input
+        value={studentName}
+        placeholder="Student Name"
+        onChange={(e) => setStudentName(e.target.value)}
+      />
       <button onClick={addStudent}>Add Student</button>
 
-      <input placeholder="Course Name" onChange={(e)=>setCourseName(e.target.value)} />
+      <input
+        value={courseName}
+        placeholder="Course Name"
+        onChange={(e) => setCourseName(e.target.value)}
+      />
       <button onClick={addCourse}>Add Course</button>
 
-      <br/><br/>
+      <br /><br />
 
-      <select onChange={(e)=>setSelectedStudent(e.target.value)}>
-        <option>Select Student</option>
-        {students.map(s=>(
+      <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}>
+        <option value="">Select Student</option>
+        {students.map((s) => (
           <option key={s._id} value={s._id}>{s.name}</option>
         ))}
       </select>
 
-      <select onChange={(e)=>setSelectedCourse(e.target.value)}>
-        <option>Select Course</option>
-        {courses.map(c=>(
+      <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
+        <option value="">Select Course</option>
+        {courses.map((c) => (
           <option key={c._id} value={c._id}>{c.title}</option>
         ))}
       </select>
@@ -156,19 +166,18 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
       <button onClick={enroll}>Enroll</button>
 
       <h3>Students</h3>
-      {students.map(s=>(
+      {students.map((s) => (
         <div key={s._id}>
-          {s.name} → {s.courses.map(c=>c.title).join(", ")}
+          {s.name} - {s.courses.map((c) => c.title).join(", ")}
         </div>
       ))}
 
       <h3>Courses</h3>
-      {courses.map(c=>(
+      {courses.map((c) => (
         <div key={c._id}>
-          {c.title} → {c.students.map(s=>s.name).join(", ")}
+          {c.title} - {c.students.map((s) => s.name).join(", ")}
         </div>
       ))}
-
     </div>
   );
 }
